@@ -21,6 +21,7 @@ promise.then(() => db = mongoClient.db("myWallet")); //conectando nosso sistema 
 
 
 app.post('/sign-up', async (req, res) =>{
+    try{
     const userSchema = joi.object({
         name: joi.string().required(),
         email: joi.string().email().required(),
@@ -33,7 +34,7 @@ app.post('/sign-up', async (req, res) =>{
         console.log("erro na validação")
         return; 
     } 
-    try{
+    
         const user = req.body; 
         const userExist = await db.collection('users').findOne({ email: user.email });
     if (userExist) {
@@ -49,7 +50,40 @@ app.post('/sign-up', async (req, res) =>{
         res.sendStatus(422)
     }
 })
+app.post('/sign-in', async(req, res) => {
+    try {
+     const loginSchema = joi.object({
+        email: joi.string().email().required(),
+        password: joi.string().required()    
+    })
+    const validation = loginSchema.validate(req.body)
+    if(validation.error) {
+        res.sendStatus(422);
+        console.log("erro na validação")
+        return; 
+    }  
+    
+        const { email, password } = req.body;
+        const user = await db.collection('users').findOne({ email });
+       
+    if (user && bcrypt.compareSync(password, user.password)) {
+        console.log("A comparação deu ok")
+        const token = uuid();
+		await db.collection('sessions').insertOne({ token, userId: user._id })
+    } else {
+        res.sendStatus(400)
+        return
+    }
+            
+    res.sendStatus(201); 
+    return
 
+    } catch(erro) {
+        console.log("deu ruim")
+        res.sendStatus(422)
+        return
+    }
+})
 
 
 app.listen(5000, () => {
