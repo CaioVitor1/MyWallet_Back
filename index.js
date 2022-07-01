@@ -70,20 +70,45 @@ app.post('/sign-in', async(req, res) => {
         console.log("A comparação deu ok")
         const token = uuid();
 		await db.collection('sessions').insertOne({ token, userId: user._id })
+        res.status(201).send({name: user.name, token: token, email: user.email}); 
+        return
     } else {
         res.sendStatus(400)
         return
     }
-            
-    res.sendStatus(201); 
-    return
-
     } catch(erro) {
         console.log("deu ruim")
         res.sendStatus(422)
         return
     }
 })
+
+app.post('/cashFlux', async(req, res) => {
+    try{
+        const cashSchema = joi.object({
+            value: joi.string().required(),
+            description: joi.string().required(),
+            type: joi.string().required(),
+            email: joi.string().email().required()
+        })
+        const validation = cashSchema.validate(req.body)
+        if(validation.error) {
+        res.sendStatus(422);
+        console.log("erro na validação")
+        return; 
+        }
+        await db.collection('cashFlux').insertOne(req.body) 
+        res.sendStatus(201);
+        console.log("cadastramos")  
+        return
+
+    }catch(erro) {
+        console.log("deu ruim")
+        res.sendStatus(422)
+        return
+    }
+})
+
 
 
 app.listen(5000, () => {
