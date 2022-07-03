@@ -1,0 +1,62 @@
+import { db } from '../dbStrategy/mongo.js';
+import joi from 'joi';
+
+export async function getCashFlux(req, res) {
+    try {
+        const { authorization } = req.headers;
+        console.log(authorization)
+        const token = authorization?.replace('Bearer ', '');
+      console.log(token)
+        if(!token) {
+            return res.sendStatus(401);
+        }
+        console.log("vamos buscar o token nas sessoões")
+
+        const session = await db.collection('sessions').findOne({ token });
+        if (!session) {
+        return res.sendStatus(401)
+        }
+        // eu preciso retornar apenas os objetos do cashFlux que pertencerem ao email do usuário
+        const user = await db.collection('users').findOne({ _id: session.userId });
+        console.log(user)
+        if (!user) {
+            return res.sendStatus(401);
+        }
+
+        const flux = await db.collection('cashFlux').find({email: user.email}).toArray();
+        res.status(201).send(flux); 
+        return
+        } 
+    catch(erro) {
+        console.log(erro)
+        console.log("deu ruim")
+        res.sendStatus(422)
+        return
+    }
+}
+
+export async function postCashFlux(req, res) {
+    try{
+        const cashSchema = joi.object({
+            value: joi.number().required(),
+            description: joi.string().required(),
+            type: joi.string().required(),
+            email: joi.string().email().required(),
+            time: joi.string().required()
+        })
+        const validation = cashSchema.validate(req.body)
+        if(validation.error) {
+        res.sendStatus(422);
+        console.log("erro na validação")
+        return; 
+        }
+        await db.collection('cashFlux').insertOne(req.body) 
+        res.sendStatus(201);  
+        return
+
+    }catch(erro) {
+        console.log("deu ruim")
+        res.sendStatus(422)
+        return
+    }
+}
