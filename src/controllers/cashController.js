@@ -48,3 +48,31 @@ export async function postCashFlux(req, res) {
         return
     }
 }
+
+export async function deleteCashFlux(req,res) {
+    try {
+        const { id } = req.params;
+        const userEmail = req.headers.email;
+
+        const cashCollection = mongoClient.collection('cashFlux');
+
+        const existingCash = await cashCollection.findOne({_id: id})
+    if (!existingCash) {
+        console.log("Não achamos nenhum item")
+      return res.sendStatus(409);
+    }
+
+    if (existingCash.email !== userEmail) {
+      return res.sendStatus(401);
+    }
+
+    await cashCollection.deleteOne({
+      _id: existingCash._id
+    }) 
+
+    } catch(erro) {
+        console.log("deu ruim")
+        res.sendStatus(422)
+        return
+    }
+}

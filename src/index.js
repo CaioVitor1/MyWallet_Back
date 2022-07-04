@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import { signUp, signIn } from './controllers/authController.js';
-import {getCashFlux, postCashFlux} from './controllers/cashController.js'
 import authRouter from './routes/authRouter.js';
 import cashRouter from './routes/userRouter.js';
 
