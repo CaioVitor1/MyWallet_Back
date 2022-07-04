@@ -5,5 +5,4 @@ import validateUser from '../middlewares/validateUser.js';
 const cashRouter = Router();
 cashRouter.get("/cashFlux", validateUser, getCashFlux);
 cashRouter.post("/cashFlux", postCashFlux)
-cashRouter.delete("/deletecash/:id", deleteCashFlux)
 export default cashRouter;
