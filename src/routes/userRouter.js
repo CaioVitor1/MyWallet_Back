@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCashFlux, postCashFlux, deleteCashFlux} from '../controllers/cashController.js'
+import { getCashFlux, postCashFlux} from '../controllers/cashController.js'
 import validateUser from '../middlewares/validateUser.js';
 
 const cashRouter = Router();
